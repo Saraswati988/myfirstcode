@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+div {
+
+  width: 800px;
+  height: 900px;
+  border: 1px solid black;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+ 
+
+<script>
+function showCoords(event) {
+  var cX = event.cordX;
+  var sX = event.screenX;
+  var cY = event.cordY;
+  var sY = event.screenY;
+  var coords1 = "client - X: " + cX + ", Y coords: " + cY;
+  var coords2 = "screen - X: " + sX + ", Y coords: " + sY;
+  document.getElementById("demo").innerHTML = coords1 + "<br>" + coords2;
+}
+</script>
+
+<div onclick="showCoords(event)"><p id="demo"></p></div>
+
+</body>
+
+</html>
