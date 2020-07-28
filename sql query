@@ -1,0 +1,30 @@
+create table clg
+(
+cid number,
+cname varchar(20)
+);
+
+role-> set of prvlgs
+dba
+
+conn /as sysdba
+
+grant dba to dxcfs;
+
+
+
+create table clg
+(
+cid number,
+cname varchar(20)
+);
+
+
+insert into clg values('121','JNU');
+
+insert into clg values('122','IIT');
+
+select * from clg;
+
+
+select * from tab;
