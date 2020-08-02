@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<style type="text/css">
+
+.mycol
+{
+background-color: pink;
+}
+
+
+.myButton {
+box-shadow: 3px 4px 0px 0px #8a2a21;
+background-color:#211919;
+border-radius:18px;
+border:1px solid #ad1d13;
+display:inline-block;
+cursor:pointer;
+color:#ffffff;
+font-family:Arial;
+font-size:17px;
+padding:7px 25px;
+text-decoration:none;
+text-shadow:0px 1px 0px #810e05;
+}
+.myButton:hover {
+background-color:blue;
+}
+.myButton:active {
+position:relative;
+top:1px;
+}
+	body
+	{
+		background:url("nature.jpg");
+		background-repeat: no-repeat;
+		background-size: cover;
+		opacity: 0.7;
+	}
+</style>
+
+<script type="text/javascript">
+
+function test(e)
+{
+var a= document.getElementById('mytxt').value;
+//alert(a);
+
+//alert(e.which);
+
+if(!( e.which >= 65 && e.which <=90 ))
+{
+e.preventDefault(); //a-97 , A - 65
+
+}
+
+}
+function validate()
+{
+	var password=document.getElementById("pwd").value;
+	var confirm password=document.getElementById("confmpwd").value;
+	if(password==confirm password)
+		{
+			alert("password dnot match");
+	return true;
+}
+return false;
+}
+
+
+function getAge(datevalue) {
+    var today = new Date();
+    var birthDate = new Date(datevalue);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    var da = today.getDate() - birthDate.getDate();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    if(m<0){
+        m +=12;
+    }
+    
+    return age;
+}
+var age=getAge("1987/08/05");
+alert(age);
+if(age < 18)
+{
+("This age is restrict");
+
+} else {
+
+("This age is allowed");
+}
+
+
+data=['graduate type','under graduate','post graduate'];
+function graduate()
+{
+	var type=document.getElementById('one');
+	for (i=0;i<data.length;i++)
+	{
+		var element=document.createelement('option')
+		element.text=type[i];
+		type.add(element,i+1)
+	}
+
+}
+values=[['under Graduation','computer engineering','electronic engineering','bachelor of arts'] ['post Graduation','masters in arts','mtech computer science','advanced mtech']]
+
+function filled()
+{
+	var type=document.getElementById('one'); 
+	var selectedIdx = type.selectedIndex;
+  var data_dd=document.getElementById('ddd');
+  data_dd.innertext=null;
+
+
+  for(i=0;i<=values[selectedIdx-1].length;i++)
+  {
+  	var ele =document.createelement('options');
+  	ele.text=values.[selectedIdx-1][i];
+  	data_dd.add(ele,i+1)
+  }
+}
+
+
+
+
+</script>
+</head>
+	<body>
+
+<center>
+<h1 style="color: white"> REGISTRATION FORM </h1>
+
+<div style="height: 500px;width: 300px; background-color: pink">
+<table  align="center" width="50%">
+	<form action="test11.html">
+<tr>
+	
+		<td> <input type="text" id="mytxt" onkeypress ="test(event)" placeholder="username"> </td>
+
+	</tr>
+
+	<tr>
+		<td> <input type="password" placeholder="password"  id="pwd" required="*" </td>
+</tr>
+
+ <tr>
+		 <td> <input type="password" placeholder=" confirm password"  id="confmpwd" equired  </td>
+</tr>
+
+<tr>
+<td>
+QUALIFICATION
+<br>
+<select required onload="graduate()">
+
+<option >Graduation </option>
+<option>postgraduation</option>
+
+</select>
+</td>
+<br>
+<tr>
+	<td>
+
+<select required="">
+
+<option>masters in arts</option>
+<option> Mtech computer science</option>
+<option> electronic engineering</option>
+<option>bachelor of arts</option>
+
+</select>
+</td>
+</tr>
+<tr>
+	<td>
+		<input type="date" name="checking" id="dob" max="2002-07-24" onclick="getAge(datevalue)" required >
+	</td>
+</tr>
+<tr>
+<td>
+<input type="submit" value="Submit Form" class="myButton" onclick="validate()">
+</td>
+</tr>
+
+
+</table>
+</center>
+</form>
+
+<body>
+
+</body>
+</html>
+
+
