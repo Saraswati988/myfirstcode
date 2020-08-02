@@ -49,7 +49,7 @@ var a= document.getElementById('mytxt').value;
 
 //alert(e.which);
 
-if(!( e.which >= 65 && e.which <=90 ))
+if(!(( e.which >= 65 && e.which <=90 ) || (e.which >= 97 && e.which <=122)))
 {
 e.preventDefault(); //a-97 , A - 65
 
