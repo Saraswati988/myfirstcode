@@ -1,0 +1,272 @@
+
+write a java function to break the given string when a space is encountered
+
+
+package com.task.ass;
+
+public class Sba {
+	
+	  static String str="this is java programming";
+		
+public static void main(String[] args) {
+		
+	     
+		String[] arrOfStr = str.split(" ", 4); 
+	  
+	        for (String a : arrOfStr) 
+	            System.out.println(a); 
+	        System.out.println("-----------------");
+	        }
+
+	
+
+}
+-------------------------------------------------------------------------------------------------------
+
+ write a java function to break the given string when a space is encountered and reverse each word
+
+
+package com.task.ass;
+
+
+public class Revstr {
+
+  public static void main(String[] args) {
+    
+
+    String strg="This is java programming";
+    String[] substgr=strg.split(" ");
+    for(int i=0;i<substgr.length;i++)
+    {
+      char arr[]=substgr[i].toCharArray();
+      for(int k=substgr[i].length()-1;k>=0;k--)
+      {
+        System.out.print(arr[k]);
+      }
+     System.out.println();
+    }
+    
+  }
+
+}
+
+=================================================================================================================
+
+create a showroom class that has cars in it ..
+       -> implement a functionality to search the  cars in a given showroom based on the showroom name
+           -> allow the user to sort the car based on its  a)manufacture year
+b)name of the car
+
+ -> create a function to print the car details based on the showroom name and sortType(year/name)
+
+
+
+
+
+package com.task.ass;
+
+import java.util.Comparator;
+
+public  class Car  {
+	int manyear;
+private	String CarName;
+public int getManyear() {
+	return manyear;
+}
+public void setManyear(int manyear) {
+	this.manyear = manyear;
+}
+public String getCarName() {
+	return CarName;
+}
+public void setCarName(String carName) {
+	CarName = carName;
+}
+public Car(String carName, int manyear) {
+	super();
+	this.manyear = manyear;
+	CarName = carName;
+}
+@Override
+public String toString() {
+	return "Car [manyear=" + manyear + ", CarName=" + CarName + "]";
+}
+public Car() {}
+//@Override
+//public int compareTo(Car o) {
+	
+	//return o.manyear-this.manyear;
+	
+	
+//}
+
+}
+====================================================================================================================================
+package com.task.ass;
+
+import java.util.List;
+
+public class ShowroomDemo {
+	String Shroomname;
+	int address;
+	List<Car> cars;
+	@Override
+	public String toString() {
+		return "ShowroomDemo [Shroomname=" + Shroomname + ", address=" + address + ", cars=" + cars + "]";
+	}
+	public ShowroomDemo(String shroomname, int address, List<Car> cars) {
+		super();
+		Shroomname = shroomname;
+		this.address = address;
+		this.cars = cars;
+	}
+	public String getShroomname() {
+		return Shroomname;
+	}
+	public void setShroomname(String shroomname) {
+		Shroomname = shroomname;
+	}
+	public int getAddress() {
+		return address;
+	}
+	public void setAddress(int address) {
+		this.address = address;
+	}
+	public List<Car> getCars() {
+		return cars;
+	}
+	public void setCars(List<Car> cars) {
+		this.cars = cars;
+	}
+	
+public ShowroomDemo() {}	
+}
+=========================================================================================================================================
+package com.task.ass;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class Mainclass {
+	Map<String, List<Car>> cartsore;
+	public void dispCarByShoerromName(String  Shroomname) {
+		List<Car> cars=cartsore.get(Shroomname);
+		for(Car car:cars) {
+			System.out.println(car);
+		}
+		
+	}
+	
+	
+	
+public static void main(String[] args) {
+		
+		Car ca1=new Car("MARUTI800",1987);
+		Car ca2=new Car("BENZ",1980);
+		Car ca3=new Car("SWIFT",1988);
+		Car ca4=new Car("SOMETHING",1982);
+		Car ca5=new Car();
+		List<Car> Cars=new ArrayList<Car>();
+		Cars.add(ca1);
+		Cars.add(ca2);
+		Cars.add(ca3);
+		Cars.add(ca4);
+		Cars.add(ca5);
+		ShowroomDemo showroomDemo=new  ShowroomDemo("xyz",456,Cars);
+		Car ca6=new Car("fgfe",1212);
+		Car ca7=new Car("bgy",1219);
+		List<Car> cars1=new ArrayList<Car>();
+		cars1.add(ca6);
+		cars1.add(ca7);
+		
+		ShowroomDemo showroomDemo1=new  ShowroomDemo("bgt",456,cars1);
+		Mainclass mainclass=new Mainclass();
+		mainclass.cartsore=new HashMap<String ,List<Car>>();
+		mainclass.cartsore.put(showroomDemo.getShroomname(), showroomDemo.getCars());
+		mainclass.dispCarByShoerromName("xyz");
+		
+		
+
+
+
+		}
+
+}
+==================================================================================================================================
+package com.task.ass;
+
+import java.util.Comparator;
+
+public class YearSort implements Comparator<Car> {
+  		@Override
+		public int compare(Car o1, Car o2) {		
+		return o2.getManyear() - o1.getManyear();
+		}
+		}
+
+
+=======================================================================================================
+
+package com.task.ass;
+
+import java.util.Comparator;
+
+public class YearSort implements Comparator<Car> {
+  		@Override
+		public int compare(Car o1, Car o2) {		
+		return o2.getManyear() - o1.getManyear();
+		}
+		}
+
+
+==============================================================================================
+create a custom exception of type UNCHECKED to validate marks entered by user. valid marks are 0-100 anything beyond should throw the exception created by you
+
+
+public class MarksException  extends Exception{
+	
+	public  MarksException()
+	{
+		super("Marks Out of Range");
+	}
+
+
+}
+
+
+
+
+public class StudentMarks {
+	public void ValidateMarks(int marks) throws MarksException
+	{
+		if(!(marks>=0 && marks<=100))
+			throw new MarksException();
+		else
+			System.out.println("marks scored is, "+marks);
+	}
+
+}
+
+
+public class Mainclass {
+public static void main(String[] args) {
+		
+		StudentMarks sm = new StudentMarks();
+		
+		try {
+			sm.ValidateMarks(12);
+		} 
+		catch (Exception e) {
+			System.out.println(e);
+		}	
+		
+	}
+
+}
+
+
+=========================================================================================================================
