@@ -1,0 +1,750 @@
+package com.myass.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Date;
+import java.sql.*;
+
+import com.myassesment.dbutil.DbConnection;
+import com.myassesment.model.Attendance;
+import com.myassesment.model.Students;
+
+
+
+public class StudentDao {
+	
+
+	public ArrayList<Students> displaySem(int sem)
+	{
+	try
+	{
+	
+	Connection con=DbConnection.getConnect();
+	String sql="select * from students where sem=?";
+	
+	PreparedStatement stat=con.prepareStatement(sql);
+	stat.setInt(1,sem);
+	ResultSet rs= stat.executeQuery();
+	
+	ArrayList<Students> studentsem=new ArrayList<>();
+	
+	while(rs.next())
+	{
+	int studId=	rs.getInt("studId");
+	
+	String studName= rs.getString("studName");
+	
+	int studSem=rs.getInt("sem");
+	
+	Students students =new Students(studId, studName, studSem);
+	
+	studentsem.add(students);
+	
+	}
+	
+	return studentsem;
+	
+	}
+	catch (Exception e) {
+	// TODO: handle exception
+	e.printStackTrace();
+	}
+	return null;
+	}
+	
+	
+	public void attendanceInsert(Attendance attendance)
+	{
+		try
+		{
+		
+		Connection con=DbConnection.getConnect();
+		String sql="insert into attendance values(?,?,?,?,?)";
+		PreparedStatement stat=con.prepareStatement(sql);
+		stat.setInt(1,attendance.getStudId());
+		stat.setString(2,attendance.getStudName());
+		stat.setInt(3,attendance.getSem());
+		
+		stat.setDate(4,new java.sql.Date(attendance.getAttendanceDate().getYear(),attendance.getAttendanceDate().getMonth(),attendance.getAttendanceDate().getDate()));
+		
+		stat.setString(5,"A");
+		
+ stat.executeUpdate();
+		
+		
+		}
+		
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			}
+		
+	}
+	
+	
+	
+	public void updateAttendance(String mark)
+	{
+		try
+		{
+		
+		Connection con=DbConnection.getConnect();
+		
+		String sql="update attendance set AttendanceStatus=? where studId=?";
+		PreparedStatement stat=con.prepareStatement(sql);
+		stat.setString(1,"P");
+		stat.setString(2,mark);
+		stat.executeUpdate();
+		
+		}
+		
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			}
+		
+		
+	}
+
+	
+	
+	public ArrayList<Attendance> displayAttendance(int studsem, Date selectdate)
+	{
+		try
+		{
+		
+		Connection con=DbConnection.getConnect();
+		
+		System.out.println(studsem +    "      "+selectdate);
+		
+		String sql="select * from attendance where sem=? and AttendanceDate =?";
+		
+		PreparedStatement stat=con.prepareStatement(sql);
+		
+		stat.setInt(1,studsem);
+		
+		
+		stat.setDate(2, new java.sql.Date(selectdate.getTime()));        
+		
+		ResultSet rs= stat.executeQuery();  
+		
+		ArrayList<Attendance> showlist=new ArrayList<>();
+		
+		while(rs.next())
+		{
+		int stuid=	rs.getInt("studId");
+		
+		String studName= rs.getString("studName");
+		
+		int studSem=rs.getInt("sem");
+		
+		Date attenddate=rs.getDate("AttendanceDate");
+		
+		String studstatus= rs.getString("AttendanceStatus");
+		
+		Attendance attendance= new Attendance(stuid, studName, studSem, attenddate,studstatus); 
+		
+		showlist.add(attendance);
+		
+		}
+		return showlist;
+		}
+		
+		catch (Exception e) {
+			// TODO: handle exception
+			e.printStackTrace();
+			}
+		return null;
+		
+	}
+		
+		
+
+}
+==================================================
+package com.myass.dbutil;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class Dbconnection {
+	
+
+public static Connection getConnect() {
+		
+		try{
+			Class.forName("oracle.jdbc.OracleDriver");
+			Connection con=DriverManager.getConnection("jdbc:oracle:thin:@192.168.0.5:1521:xe", "dxcfs","pass");
+			return con;
+			}
+			catch (Exception e) {
+			e.printStackTrace();
+			return null;
+			}
+			}
+
+}
+======================================
+package com.myass.demo;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.myassesment.dao.StudentDao;
+import com.myassesment.model.Attendance;
+import com.myassesment.model.Students;
+
+@WebServlet("/displayAttendanceServ")
+public class displayAttendanceServ extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	
+		
+	
+		response.setContentType("text/html");
+		int showsem =Integer.parseInt(request.getParameter("showsem"));  
+		String showdate=request.getParameter("showdate"); 
+		
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		Date selectdate=null;
+		try
+		{
+		selectdate=sdf.parse(showdate);
+		}
+		catch (Exception e) {
+		// TODO: handle exception
+		e.printStackTrace();
+		}
+		
+		
+		StudentDao dao =new StudentDao();
+		
+	ArrayList<Attendance>displaystatus= dao.displayAttendance(showsem, selectdate);
+	
+	HttpSession session=request.getSession();
+	session.setAttribute("displaystatus",displaystatus);
+
+	RequestDispatcher rd= request.getRequestDispatcher("displayAttendanceForm.jsp");
+	rd.forward(request, response);
+		
+		
+
+		
+		
+		
+	}
+
+	
+}
+==================================================
+package com.myass.demo;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.myassesment.dao.StudentDao;
+import com.myassesment.dbutil.DbConnection;
+import com.myassesment.model.Students;
+
+
+
+
+
+@WebServlet("/markAttendanceServ")
+public class markAttendanceServ extends HttpServlet {
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	
+		
+		PrintWriter out=response.getWriter();
+		response.setContentType("text/html");
+		
+		try {
+		
+		int sem=Integer.parseInt(request.getParameter("sem"));
+		
+		StudentDao dao=new StudentDao();
+	
+		ArrayList<Students> studentsem= dao.displaySem(sem);
+		
+		HttpSession session=request.getSession();
+		session.setAttribute("studs", studentsem);
+		session.setAttribute("sem", sem);
+		
+		
+		RequestDispatcher rd= request.getRequestDispatcher("markAttendanceForm.jsp");
+		rd.forward(request, response);
+		
+		}
+		catch (Exception e) {
+			out.print("<html>");
+			out.print("<script type=\"text/javascript\">");
+			out.print("alert('please select sem');");
+			out.print("</script>");
+			
+			out.print("</html>");
+			
+			e.printStackTrace();
+			
+		}
+		
+		
+		
+		
+	
+	
+	
+	
+	}
+	
+}
+================================================================================package com.myass.demo;
+
+import java.io.IOException;
+
+
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.ArrayList;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.myassesment.dao.StudentDao;
+import com.myassesment.model.Attendance;
+import com.myassesment.model.Students;
+
+@WebServlet("/storeAttendanceserv")
+public class storeAttendanceserv extends HttpServlet {
+	
+    
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	
+		PrintWriter out=response.getWriter();
+		response.setContentType("text/html");
+		
+		String[] attendancestatus=request.getParameterValues("status");
+		HttpSession session=request.getSession();
+		
+		ArrayList<Students> studentsem=(ArrayList<Students>)session.getAttribute("studs");
+		
+		for(Students student:studentsem) 
+		{
+		Attendance attendance=new Attendance(student.getStudId(),student.getStudName(),student.getSem(), new Date(),"");
+		StudentDao dao=new StudentDao();
+		dao.attendanceInsert(attendance);
+		
+		}
+		
+		
+		for(String attend:attendancestatus)
+		{
+			StudentDao dao=new StudentDao();
+			dao.updateAttendance(attend);
+		}
+		
+		out.print("<body bgcolor=\"black\" align=\"center\" style=\"color: green\">");
+		out.print("Attendance Marked");
+		out.print("<br><br><br>");
+		out.print("<form action='mainForm.jsp'>");
+		out.print("<input type='submit' value='MainMenu' name='return'>");
+		out.print("</form>");
+		
+		
+		out.print("</body>");
+
+	
+	}
+
+}
+==============================================================================
+package com.myasst.model;
+
+import java.util.Date;
+
+public class Attendance {
+	
+	private int studId;
+	private String studName;
+	private int sem;
+	private Date attendanceDate;
+	private String attendanceStatus;
+	
+	
+		
+	public Attendance(int studId, String studName, int sem, Date attendanceDate, String attendanceStatus) {
+		super();
+		this.studId = studId;
+		this.studName = studName;
+		this.sem = sem;
+		this.attendanceDate = attendanceDate;
+		this.attendanceStatus = attendanceStatus;
+	}
+	
+	public int getStudId() {
+		return studId;
+	}
+	public void setStudId(int studId) {
+		this.studId = studId;
+	}
+	public String getStudName() {
+		return studName;
+	}
+	public void setStudName(String studName) {
+		this.studName = studName;
+	}
+	public int getSem() {
+		return sem;
+	}
+	public void setSem(int sem) {
+		this.sem = sem;
+	}
+	public Date getAttendanceDate() {
+		return attendanceDate;
+	}
+	public void setAttendanceDate(Date attendanceDate) {
+		this.attendanceDate = attendanceDate;
+	}
+	public String getAttendanceStatus() {
+		return attendanceStatus;
+	}
+	public void setAttendanceStatus(String attendanceStatus) {
+		this.attendanceStatus = attendanceStatus;
+	}
+	@Override
+	public String toString() {
+		return "Attendance [studId=" + studId + ", studName=" + studName + ", sem=" + sem + ", attendanceDate="
+				+ attendanceDate + ", attendanceStatus=" + attendanceStatus + "]";
+	}
+	
+	
+	
+	
+
+}
+===================================================================package com.myass.model;
+
+public class Students {
+	
+	private int studId;
+	private String studName;
+	private int sem;
+	public Students(int studId, String studName, int sem) {
+		super();
+		this.studId = studId;
+		this.studName = studName;
+		this.sem = sem;
+	}
+	public int getStudId() {
+		return studId;
+	}
+	public void setStudId(int studId) {
+		this.studId = studId;
+	}
+	public String getStudName() {
+		return studName;
+	}
+	public void setStudName(String studName) {
+		this.studName = studName;
+	}
+	public int getSem() {
+		return sem;
+	}
+	public void setSem(int sem) {
+		this.sem = sem;
+	}
+	@Override
+	public String toString() {
+		return "Students [studId=" + studId + ", studName=" + studName + ", sem=" + sem + "]";
+	}
+	
+	
+
+}
+========================================================================================
+<%@page import="com.myassesment.model.Attendance"%>
+<%@page import="java.util.ArrayList"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<!DOCTYPE html>
+<html>
+<head>
+<style type="text/css">
+
+td
+{
+background-color: white;
+font-family:comic sans ms;
+font-size: 25px;
+}
+
+</style>
+
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+
+
+<body bgcolor="black" align="center">
+
+<table width="90%" align="center" >
+<tr> <td>Stud Id  </td> <td>Stud Name  </td> <td> Sem </td> <td> AttendanceDate </td> <td> AttendanceStatus  </td> </tr>
+
+
+<c:forEach var="name" items="${displaystatus}">
+
+<tr>
+
+<td>
+ <c:out value="${name.studId}"/>
+ 
+ </td>
+ 
+ <td>
+ <c:out value="${name.studName}"/>
+ 
+ </td>
+ <td>
+ <c:out value="${name.sem}"/>
+ 
+ </td>
+ <td>
+ <c:out value="${name.attendanceDate}"/>
+ 
+ </td>
+ <td>
+ <c:out value="${name.attendanceStatus}"/>
+ 
+ </td>
+ </tr>
+ 
+</c:forEach>
+
+
+
+</table>
+<br>
+<br>
+
+<form action="mainForm.jsp">
+<input type="submit" value="menu">
+</form>
+
+
+</body>
+</html>
+===================================================================================
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body bgcolor="black" align="center">
+
+<fieldset align="center">
+<legend style="color: red" align ="center">Attendance Field</legend>
+<br>
+
+<form action="selectSem.jsp">
+<input type="submit" value="Mark Attendance">
+
+</form>
+<br>
+<br>
+<form action="selectDate.jsp">
+<input type="submit" value="Display the Attendance">
+
+</fieldset>
+
+
+</body>
+</html>
+=================================================================================
+<%@page import="com.myassesment.dao.StudentDao"%>
+<%@page import="com.myassesment.model.Students"%>
+<%@page import="java.util.ArrayList"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body bgcolor="blue" align="center" style="color: aqua">
+<fieldset align="center">
+<legend style="color: white" align ="center">Mark the Attendance</legend>
+
+<form action="storeAttendserv">
+<br>
+
+<table align="center">
+
+
+<%
+out.print("<tr> <td> Stud Id </td> <td> Name </td>  <td> Select </td> </tr>");
+
+ArrayList<Students> studentsem=(ArrayList<Students>)session.getAttribute("studs");
+
+
+for(Students student:studentsem)
+{
+	out.print("<tr>");
+	
+	out.print("<td>"+student.getStudId()+"</td>");
+	out.print("<td>"+student.getStudName()+"</td>");
+	out.print("<td> <input type='checkbox' name='status' value='"+student.getStudId()+"'> </td>");
+	
+	out.print("</tr>");
+	
+	
+	
+	
+}
+
+
+
+%>
+
+
+</table>
+
+<br>
+<br>
+
+<input type="submit" value="Mark Attandence">
+</form>
+
+</fieldset>
+</body>
+</html>
+========================================================================================<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+<script type="text/javascript">
+
+function dobValidate() {
+var d=new Date();
+var yy=d.getFullYear();
+var mon=d.getMonth()+1;
+var dd=d.getDate();
+
+if(mon<10){
+mon='0'+mon;
+}
+if(dd<10){
+dd='0'+dd;
+}
+document.getElementById('dob').max=yy+'-'+mon+'-'+dd;
+
+}
+
+</script>
+</head>
+<body bgcolor="black" align="center">
+<form action="displayAttendanceServ">
+
+
+<fieldset align="center" style="color: green">
+<legend style="color: red" align ="center">Select to Display Attendance</legend>
+<br>
+Select Sem
+<select name="showsem">
+
+<option value="1"> Sem 1 </option>
+<option value="2"> Sem 2 </option>
+<option value="3"> Sem 3 </option>
+<option value="4"> Sem 4 </option>
+<option value="5"> Sem 5 </option>
+
+</select> <br><br>
+select Date
+
+<input type="date" name="showdate" onclick="dobValidate()" id="dob"><br><br>
+
+<input type="submit" value="disp Attendance">
+
+</fieldset>
+
+</form>
+</body>
+</html>
+==========================================================
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body bgcolor="black" align="center" style="color: green">
+
+<fieldset align="center">
+<legend style="color: red" align ="center">Mark Attendance</legend>
+<br>
+
+<form action="markAttendanceServ">
+Select Sem <br>
+<select name="sem">
+<option> select </option>
+<option value="1"> Sem 1 </option>
+<option value="2"> Sem 2 </option>
+<option value="3"> Sem 3 </option>
+<option value="4"> Sem 4 </option>
+<option value="5"> Sem 5 </option>
+
+</select> <br><br>
+
+<input type="submit" value="Select the Sem">
+
+</form>
+
+</fieldset>
+
+
+</body>
+
+
+
+
+</html>
