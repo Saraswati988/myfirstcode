@@ -1,0 +1,634 @@
+================pom.xml===================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<modelVersion>4.0.0</modelVersion>
+<groupId>net.codejava</groupId>
+<artifactId>SpringMvcHibernateXML</artifactId>
+<name>SpringMvcHibernateXML</name>
+<packaging>war</packaging>
+<version>1.0.0-BUILD-SNAPSHOT</version>
+
+<properties>
+<java-version>1.7</java-version>
+<org.springframework-version>4.0.3.RELEASE</org.springframework-version>
+</properties>
+
+<dependencies>
+
+<dependency>
+    <groupId>org.aspectj</groupId>
+    <artifactId>aspectjrt</artifactId>
+    <version>1.6.11</version>
+</dependency>
+
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>1.7.23</version>
+</dependency>
+
+
+
+<!-- Spring -->
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-context</artifactId>
+<version>${org.springframework-version}</version>
+</dependency>
+
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-webmvc</artifactId>
+<version>${org.springframework-version}</version>
+</dependency>
+<dependency>
+<groupId>org.springframework</groupId>
+<artifactId>spring-orm</artifactId>
+<version>${org.springframework-version}</version>
+<type>jar</type>
+<scope>compile</scope>
+</dependency>
+
+<!-- Hibernate -->
+<dependency>
+<groupId>org.hibernate</groupId>
+<artifactId>hibernate-core</artifactId>
+<version>4.3.5.Final</version>
+</dependency>
+
+<!-- Servlet -->
+<dependency>
+<groupId>javax.servlet</groupId>
+<artifactId>javax.servlet-api</artifactId>
+<version>3.1.0</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>javax.servlet.jsp</groupId>
+<artifactId>javax.servlet.jsp-api</artifactId>
+<version>2.3.1</version>
+<scope>provided</scope>
+</dependency>
+<dependency>
+<groupId>jstl</groupId>
+<artifactId>jstl</artifactId>
+<version>1.2</version>
+</dependency>
+
+<!-- Apache Database Connection Pool -->
+<!-- https://mvnrepository.com/artifact/commons-dbcp/commons-dbcp -->
+<dependency>
+   <groupId>commons-dbcp</groupId>
+   <artifactId>commons-dbcp</artifactId>
+   <version>1.4</version>
+</dependency>
+ 
+</dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-eclipse-plugin</artifactId>
+                <version>2.9</version>
+                <configuration>
+                    <additionalProjectnatures>
+                        <projectnature>org.springframework.ide.eclipse.core.springnature</projectnature>
+                    </additionalProjectnatures>
+                    <additionalBuildcommands>
+                        <buildcommand>org.springframework.ide.eclipse.core.springbuilder</buildcommand>
+                    </additionalBuildcommands>
+                    <downloadSources>true</downloadSources>
+                    <downloadJavadocs>true</downloadJavadocs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <configuration>
+                    <mainClass>org.test.int1.Main</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+=============================home controller=======================================================================
+package com.spr.task;
+
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.sprhyb.demo.Author;
+
+
+@Controller
+public class HomeController {
+
+@Autowired
+PlayersDao dao;
+
+
+
+@RequestMapping(value="/")
+public String home(Model model)
+{
+return "home";
+}
+@RequestMapping(value="/display") 
+public String display(Model model,@ModelAttribute Players players) 
+{ 
+	  String status=dao.savePlayer(players);
+model.addAttribute("status",status); 
+return "display";
+}
+
+@RequestMapping(value="/delete")
+public String delete(Model model,@RequestParam ("playerName") String playerName)
+{
+String  delete=dao.delete(playerName);
+model.addAttribute("delete",delete);
+
+return "delete";
+}
+
+@RequestMapping(value="/updatePage")
+public String update()
+{
+return "updatePage";
+}
+int playerId=0;
+
+
+@RequestMapping(value="/searchForUpdate")
+public String searchForUpdate(Model model,@RequestParam("playerId") String playerId)
+{
+int playId=Integer.parseInt(playerId);
+this.playerId=playId;
+Players player=dao.getPlayerById(playId);
+model.addAttribute(player);
+return "updatePage";
+}
+
+@RequestMapping(value="/updateData")
+public String updateData(@ModelAttribute Players players)
+{
+players.setPlayerId(playerId);
+
+dao.updateplayerById(players);
+return "updatePage";
+}
+
+
+
+
+
+}
+===========================================player class========================================================
+package com.spr.task;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class Players{
+	@Id
+int	       playerId;
+String	   playerName;
+@Override
+public String toString() {
+	return "Player [playerId=" + playerId + ", playerName=" + playerName + "]";
+}
+public Players(int playerId, String playerName) {
+	super();
+	this.playerId = playerId;
+	this.playerName = playerName;
+}
+public int getPlayerId() {
+	return playerId;
+}
+public void setPlayerId(int playerId) {
+	this.playerId = playerId;
+}
+public String getPlayerName() {
+	return playerName;
+}
+public void setPlayerName(String playerName) {
+	this.playerName = playerName;
+}
+
+public Players() {}
+
+}
+
+==================================================player dao==============================================================
+package com.spr.task;
+
+
+import java.io.Serializable;
+
+import javax.transaction.Transactional;
+
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Transactional
+public class PlayersDao {
+
+	@Autowired
+	SessionFactory factory;
+
+	public PlayersDao() {
+// TODO Auto-generated constructor stub
+	}
+
+	public PlayersDao(SessionFactory factory) {
+		super();
+		this.factory = factory;
+	}
+
+	public String savePlayer(Players players) {
+		try {
+			Session session = factory.getCurrentSession();
+			session.save(players);
+			return "player Created";
+		} catch (Exception e) {
+// TODO: handle exception
+			e.printStackTrace();
+		}
+
+		return "cannot create player";
+	}
+
+	
+	 public String delete(String playerName)
+	 { 
+		 try 
+	{
+	  System.out.println(playerName);
+	 String hql="delete from Players a where a.playerName =:playerName";
+	 Session session= factory.openSession(); 
+	 Query query= session.createQuery(hql);
+	  query.setParameter("playerName",playerName);
+	  int res=query.executeUpdate();
+	  if(res>0)
+		  return "deleted";
+	  }
+	  
+	  
+	  catch (Exception e) 
+	 { 
+		  e.printStackTrace();
+	  }
+	 
+	  return "can  not delete";
+	  }
+	/*
+	 * public Author getAuthorById(int authorId){ try{ Session
+	 * session=factory.getCurrentSession(); Author
+	 * author=(Author)session.get(Author.class,authorId); return author; } catch
+	 * (Exception e) { // TODO: handle exception e.printStackTrace(); }
+	 * 
+	 * return null; }
+	 */
+	 
+	 public Players getPlayerById(int PlayerId)
+	 {
+		 try {
+			 Session session= factory.getCurrentSession();
+	Players	players	=(Players) session.get(Players.class, PlayerId);
+	return players;
+			 
+		 }
+		 catch (Exception e) {
+			// TODO: handle exception
+			 e.printStackTrace();
+		}
+		 return null;
+	 }
+	 public String updateplayerById(Players players){
+		 try{
+		 Session session=factory.getCurrentSession();
+
+		 System.out.println("players "+players);
+		 session.update("Players",players);
+		 return "player Updated";
+		 }
+		 catch (Exception e) {
+		 // TODO: handle exception
+		 e.printStackTrace();
+		 }
+
+		 return "Cannot Update player";
+		 }
+
+}
+
+==============================================hybernate cfg file==========================================================
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>        
+  <session-factory>
+    <property name="hibernate.dialect">org.hibernate.dialect.OracleDialect</property>
+    <property name="show_sql">true</property>
+    <property name="hibernate.connection.pool_size">1</property>
+    <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+    <property name="hbm2ddl.auto">update</property>
+
+    <mapping class="com.spr.task.Players"/>
+
+  </session-factory>
+</hibernate-configuration>
+===================================================home.jsp=================================================
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<title></title>
+<style>
+input[type=submit] {
+font-family: Trebuchet MS;
+background-color: pink;
+border-color: white;
+border-width: 2px solid black;
+text-decoration: none;
+color: blue;
+padding: 10px 60px;
+margin: 20px 20px;
+cursor: pointer;
+}
+input[type=submit]:hover {
+background-color: white;
+color: aqua;
+}
+input[type=text], select {
+  width: 40%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body bgcolor="black">
+<br>
+<center>
+<div style="background-color: pink">
+<font face="Trebuchet MS" size="8" color="white">Welcome To Player Portal</font>
+</div>
+<div style="background-color: white;width: 450px;height: 450px">
+<font face="Trebuchet MS" size="5">Fill the details to search Player.</font><br><br>
+<table>
+<title>Home</title>
+</head>
+<body>
+<h1>
+Hello Player PLz Provide ur Details!  
+</h1>
+<form action="display">
+
+Player Name:<input type="text" name="playerName">
+<br>
+Player Id:<input type="text" name="playerId">
+
+<br>
+<input type="submit" name="save player">
+</form>
+<form action="updatePage">
+<input type="submit" value="Update" placeholder="update">
+</form>
+
+  
+<form action="delete">
+<h1>
+Hello player PLz provide player to be deleted!  
+</h1>
+delete playerr:<input type="text" name="playerName">
+<br>
+<input type="submit" name="delete player" valuer="delete">
+</form> 
+
+<!-- <!-- <form action="updatePage">
+<input type="submit" value="Update">
+</form> --> 
+
+
+
+
+
+
+
+<form action="search">
+
+
+
+<h1>
+Hello player PLz provide id to be searched!  
+</h1>
+search player id:<input type="text" name="city">
+<br>
+<input type="submit" name="search city">
+</form>
+<form action="search name">
+<h1>
+Hello player PLz provide name to be searched!  
+</h1>
+search player name:<input type="text" name="authorname">
+<br>
+<input type="submit" name="search name"  placeholder="search">
+</form> 
+</form>
+</table> 
+</body>
+</html>
+=======================================delete.jsp============================================================
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+	<title>Home</title>
+<style>
+input[type=submit] {
+font-family: Trebuchet MS;
+background-color: black;
+border-color: black;
+border-width: 2px solid black;
+text-decoration: none;
+color: white;
+padding: 10px 60px;
+margin: 20px 20px;
+cursor: pointer;
+}
+input[type=submit]:hover {
+background-color: white;
+color: black;
+}
+input[type=text], select {
+  width: 50%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body bgcolor="black">
+<br>
+<center>
+<div style="background-color: black">
+<font face="Trebuchet MS" size="8" color="white">Welcome To Player Portal</font>
+</div>
+<div style="background-color: white;width: 550px;height: 350px">
+<font face="Trebuchet MS" size="5">Fill the details to delete Player.</font><br><br>
+<title>Home</title>
+</head>
+<body>
+<h1>
+See the deleted one  
+</h1>
+
+<P>  ${delete} </P>
+</body>
+</html>
+
+===============================================display.jsp==================================================
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<title>Home</title>
+</head>
+<body>
+<h1>
+Hello player!!  
+</h1>
+
+<P>  ${status} </P>
+</body>
+</html>
+==============================================search for update===================================================
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<title>Home</title>
+</head>
+<body>
+<h1>
+See the deleted one  
+</h1>
+
+<P>  ${author}</P>
+</body>
+</html>
+==============================================update.jsp======================================================
+
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<title>Update</title>
+<style>
+input[type=submit] {
+font-family: Trebuchet MS;
+background-color: black;
+border-color: black;
+border-width: 2px solid black;
+text-decoration: none;
+color: white;
+padding: 10px 60px;
+margin: 20px 20px;
+cursor: pointer;
+}
+input[type=submit]:hover {
+background-color: white;
+color: black;
+}
+input[type=text], select {
+  width: 50%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body bgcolor="black">
+<br>
+<center>
+<div style="background-color: black">
+<font face="Trebuchet MS" size="8" color="white">Welcome To Player Portal</font>
+</div>
+<div style="background-color: white;width: 550px;height: 850px">
+<font face="Trebuchet MS" size="5">Fill the details to update  Player.</font>
+<title>Update</title>
+</head>
+<body>
+<h1>
+Hello Author PLz Update ur Details!  
+</h1>
+<form action="searchForUpdate">
+Id:<input type="text" name="authorId" value="${author.authorId}">
+<input type="submit" value="search">
+</form>
+
+
+<form action="updateData">
+Name:<input type="text" name="authorName" value="${author.authorName}">
+<br>
+<br>City: <input type="text" name="city" value="${author.city}">
+<br>
+<input type="submit" value="update author">
+</form>
+
+</body>
+</html>
+========================================updatedata====================================================
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page session="false" %>
+<html>
+<head>
+<title>Home</title>
+</head>
+<body>
+<h1>
+See the deleted one  
+</h1>
+
+<P>  ${author} </P>
+</body>
+</html>
